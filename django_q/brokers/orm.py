@@ -15,6 +15,7 @@ def _timeout():
 
 
 class ORM(Broker):
+
     @staticmethod
     def get_connection(list_key=Conf.PREFIX):
         if transaction.get_autocommit():  # Only True when not in an atomic block
@@ -27,10 +28,10 @@ class ORM(Broker):
         return OrmQ.objects.using(Conf.ORM)
 
     def queue_size(self):
-        return self.get_connection().filter(key=self.list_key, lock__lte=_timeout()).count()
+        return self.get_connection().filter(key=self.list_key).count()
 
     def lock_size(self):
-        return self.get_connection().filter(key=self.list_key, lock__gt=_timeout()).count()
+        return self.get_connection().filter(key=self.list_key).count()
 
     def purge_queue(self):
         return self.get_connection().filter(key=self.list_key).delete()
@@ -47,17 +48,20 @@ class ORM(Broker):
         self.delete(task_id)
 
     def enqueue(self, task):
-        package = self.get_connection().create(key=self.list_key, payload=task, lock=_timeout())
+        package = self.get_connection().create(key=self.list_key, payload=task, lock=timezone.now())
         return package.pk
 
     def dequeue(self):
-        tasks = self.get_connection().filter(key=self.list_key, lock__lt=_timeout())[0:Conf.BULK]
+        tasks = self.get_connection().filter(key=self.list_key)[0:Conf.BULK]
         if tasks:
             task_list = []
             for task in tasks:
-                if self.get_connection().filter(id=task.id, lock=task.lock).update(lock=timezone.now()):
-                    task_list.append((task.pk, task.payload))
+                task_list.append((task.pk, task.payload))
                 # else don't process, as another cluster has been faster than us on that task
+            # 从队列删除任务
+            for task in task_list:
+                self.delete(task[0])
+
             return task_list
         # empty queue, spare the cpu
         sleep(Conf.POLL)
@@ -70,4 +74,3 @@ class ORM(Broker):
 
     def acknowledge(self, task_id):
         return self.delete(task_id)
-
