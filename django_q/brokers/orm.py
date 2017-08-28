@@ -58,7 +58,7 @@ class ORM(Broker):
             for task in tasks:
                 task_list.append((task.pk, task.payload))
                 # else don't process, as another cluster has been faster than us on that task
-            # 从队列删除任务
+            # remove task from queue
             for task in task_list:
                 self.delete(task[0])
 
