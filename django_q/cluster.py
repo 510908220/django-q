@@ -11,6 +11,7 @@ import socket
 import ast
 from time import sleep
 from multiprocessing import Queue, Event, Process, Value, current_process
+import traceback
 
 # external
 import arrow
@@ -379,7 +380,7 @@ def worker(task_queue, result_queue, timer, timeout=Conf.TIMEOUT):
                 res = f(*task['args'], **task['kwargs'])
                 result = (res, True)
             except Exception as e:
-                result = ('{}'.format(e), False)
+                result = ('{}'.format(traceback.format_exc()), False)
                 if rollbar:
                     rollbar.report_exc_info()
         # Process result
