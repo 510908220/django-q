@@ -186,30 +186,23 @@ Testing
 
 To run the tests you will need `py.test <http://pytest.org/latest/>`__ and `pytest-django <https://github.com/pytest-dev/pytest-django>`__
 
+我的配置
+~~~~~~~
 
-Todo
-~~~~
+.. code:: python
 
--  Better tests and coverage
--  Less dependencies?
+    # Django Q config
+    Q_CLUSTER = {
+        'name': 'DjangORM',
+        'workers': 5,
+        'timeout': 25 * 60,  # 25分钟任务还未完成就杀掉
+        'retry': 60 * 30,  # 30min 还未执行完就会再次触发任务
+        'queue_limit': 100,
+        'save_limit': 500,
+        'bulk': 10,
+        'sync': False,
+        'daemonize_workers': False,  # 允许worker创建子进程
+        'orm': 'default',
+        'catch_up': False  # 当由于某种原因导致scheduler未触发任务，中间漏掉的时间就忽略掉
+    }
 
-Acknowledgements
-~~~~~~~~~~~~~~~~
-
--  Django Q was inspired by working with
-   `Django-RQ <https://github.com/ui/django-rq>`__ and
-   `RQ <https://github.com/ui/django-rq>`__
--  Human readable hashes by
-   `HumanHash <https://github.com/zacharyvoase/humanhash>`__
--  Redditors feedback at `r/django <https://www.reddit.com/r/django/>`__
-
-.. |image0| image:: https://travis-ci.org/Koed00/django-q.svg?branch=master
-   :target: https://travis-ci.org/Koed00/django-q
-.. |image1| image:: http://codecov.io/github/Koed00/django-q/coverage.svg?branch=master
-   :target: http://codecov.io/github/Koed00/django-q?branch=master
-.. |image2| image:: http://badges.gitter.im/Join%20Chat.svg
-   :target: https://gitter.im/Koed00/django-q
-.. |docs| image:: https://readthedocs.org/projects/docs/badge/?version=latest
-    :alt: Documentation Status
-    :scale: 100
-    :target: https://django-q.readthedocs.org/
