@@ -530,6 +530,11 @@ def scheduler(broker=None):
                         break
                 s.next_run = next_run.datetime
                 s.repeats += -1
+                
+                # rapair Out of range value for column 'repeats' at row 1
+                if s.repeats > 5000:
+                    s.repeats = -1
+                
             # send it to the cluster
             q_options['broker'] = broker
             q_options['group'] = q_options.get('group', s.name or s.id)
