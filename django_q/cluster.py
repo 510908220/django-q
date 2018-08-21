@@ -532,7 +532,7 @@ def scheduler(broker=None):
                 s.repeats += -1
                 
                 # rapair Out of range value for column 'repeats' at row 1
-                if int(s.repeats) > 5000:
+                if abs(s.repeats) > 5000:
                     s.repeats = -1
                 
             # send it to the cluster
